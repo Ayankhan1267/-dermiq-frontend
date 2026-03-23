@@ -174,10 +174,10 @@ export default function CartPage() {
               {/* Items */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {cartProducts.map(({ product, qty }) => (
-                  <div key={product.id} style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E0D8', padding: 16, display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+                  <div key={product.id} style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E0D8', padding: isMobile ? 12 : 16, display: 'flex', gap: isMobile ? 10 : 16, alignItems: 'flex-start' }}>
                     {/* Image */}
                     <div
-                      style={{ width: 90, height: 90, borderRadius: 10, overflow: 'hidden', background: '#F7F3EE', flexShrink: 0, cursor: 'pointer' }}
+                      style={{ width: isMobile ? 70 : 90, height: isMobile ? 70 : 90, borderRadius: 10, overflow: 'hidden', background: '#F7F3EE', flexShrink: 0, cursor: 'pointer' }}
                       onClick={() => router.push(`/product/${product.id}`)}
                     >
                       <Image src={product.image} alt={product.name} width={90} height={90} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
@@ -227,7 +227,7 @@ export default function CartPage() {
             </div>
 
             {/* Order Summary */}
-            <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E8E0D8', padding: 24, position: 'sticky', top: 100 }}>
+            <div style={{ background: '#fff', borderRadius: isMobile ? 0 : 20, border: isMobile ? 'none' : '1px solid #E8E0D8', borderTop: isMobile ? '1px solid #E8E0D8' : undefined, padding: isMobile ? '20px 0 0' : 24, position: isMobile ? 'static' : 'sticky', top: isMobile ? undefined : 100 }}>
               <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: 22, color: '#1A2E2B', marginBottom: 20 }}>Order Summary</h2>
 
               {/* Coupon */}
