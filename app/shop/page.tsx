@@ -1,51 +1,14 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
-import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import Navbar from '@/components/Navbar'
 import MobileToolbar from '@/components/MobileToolbar'
 import CartDrawer from '@/components/CartDrawer'
+import { ALL_PRODUCTS, type Product } from '@/lib/products'
 
-interface Product {
-  id: number
-  name: string
-  brand: string
-  category: string
-  price: number
-  mrp: number
-  rating: number
-  reviews: number
-  emoji: string
-  badge: string
-  badgeBg: string
-  tags?: string[]
-}
-
-const ALL_PRODUCTS: Product[] = [
-  { id:1, name:'Vitamin C Brightening Serum', brand:'DermIQ', category:'Serum', price:799, mrp:1299, rating:4.9, reviews:2341, emoji:'✨', badge:'Bestseller', badgeBg:'#1A2E2B', tags:['brightening','oily','combination'] },
-  { id:2, name:'Hyaluronic Acid Deep Hydra Gel', brand:'DermIQ', category:'Moisturiser', price:649, mrp:999, rating:4.8, reviews:1876, emoji:'💧', badge:'New', badgeBg:'#D4856A', tags:['hydration','dry','combination'] },
-  { id:3, name:'Mineral Sunscreen SPF 50+ PA++++', brand:'DermIQ', category:'Sunscreen', price:549, mrp:899, rating:4.9, reviews:3102, emoji:'☀️', badge:'SPF 50+', badgeBg:'#C8976A', tags:['protection','all'] },
-  { id:4, name:'Gentle Amino Acid Foaming Wash', brand:'DermIQ', category:'Cleanser', price:399, mrp:599, rating:4.7, reviews:1543, emoji:'🫧', badge:'', badgeBg:'', tags:['cleanser','sensitive'] },
-  { id:5, name:'Retinol 0.2% Night Serum', brand:'Minimalist', category:'Serum', price:699, mrp:999, rating:4.6, reviews:987, emoji:'🌙', badge:'Derma Pick', badgeBg:'#2D5F5A', tags:['anti-aging','oily','combination'] },
-  { id:6, name:'Ceramide & Hyaluronic Moisturiser', brand:'DermIQ', category:'Moisturiser', price:849, mrp:1299, rating:4.8, reviews:2103, emoji:'🏺', badge:'', badgeBg:'', tags:['barrier','dry','sensitive'] },
-  { id:7, name:'Niacinamide 10% + Zinc Serum', brand:'Minimalist', category:'Serum', price:449, mrp:699, emoji:'🔬', badge:'New', badgeBg:'#D4856A', rating:4.7, reviews:432, tags:['pores','oily','acne'] },
-  { id:8, name:'Watermelon Glow Sleeping Mask', brand:'Dot & Key', category:'Treatment', price:699, mrp:999, emoji:'🍉', badge:'New', badgeBg:'#D4856A', rating:4.8, reviews:321, tags:['hydration','all'] },
-  { id:9, name:'SPF 50 Matte Sunscreen', brand:'Pilgrim', category:'Sunscreen', price:599, mrp:899, emoji:'☀️', badge:'New', badgeBg:'#D4856A', rating:4.6, reviews:215, tags:['protection','matte','oily'] },
-  { id:10, name:'Kojic Acid Dark Spot Serum', brand:'Plum', category:'Serum', price:549, mrp:799, emoji:'✨', badge:'New', badgeBg:'#D4856A', rating:4.5, reviews:189, tags:['brightening','hyperpigmentation'] },
-  { id:11, name:'Peptide Complex Eye Cream', brand:'DermIQ', category:'Treatment', price:999, mrp:1499, emoji:'👁️', badge:'Launch', badgeBg:'#3D7A74', rating:4.9, reviews:87, tags:['anti-aging','all'] },
-  { id:12, name:'AHA 30% + BHA 2% Peeling Solution', brand:'Minimalist', category:'Treatment', price:549, mrp:799, emoji:'⚗️', badge:'Trending', badgeBg:'#C8976A', rating:4.7, reviews:654, tags:['exfoliation','oily','acne'] },
-  { id:13, name:'Salicylic Acid 2% Face Wash', brand:'Minimalist', category:'Cleanser', price:299, mrp:499, emoji:'🫧', badge:'', badgeBg:'', rating:4.6, reviews:2341, tags:['acne','oily'] },
-  { id:14, name:'Vitamin C 10% Face Serum', brand:'Plum', category:'Serum', price:449, mrp:699, emoji:'🍊', badge:'', badgeBg:'', rating:4.5, reviews:1234, tags:['brightening','combination'] },
-  { id:15, name:'SPF 30 PA+++ Sunscreen', brand:'Pilgrim', category:'Sunscreen', price:399, mrp:599, emoji:'🌤️', badge:'', badgeBg:'', rating:4.4, reviews:876, tags:['protection','daily'] },
-  { id:16, name:'Rose & Aloe Toner', brand:'Plum', category:'Toner', price:349, mrp:499, emoji:'🌹', badge:'', badgeBg:'', rating:4.5, reviews:543, tags:['hydration','sensitive'] },
-  { id:17, name:'Niacinamide Face Mist', brand:'Dot & Key', category:'Mist', price:399, mrp:599, emoji:'💨', badge:'', badgeBg:'', rating:4.6, reviews:432, tags:['pores','refresh'] },
-  { id:18, name:'Aloe Vera Soothing Gel', brand:'DermIQ', category:'Gel', price:199, mrp:349, emoji:'🌿', badge:'', badgeBg:'', rating:4.7, reviews:1876, tags:['soothing','sensitive','all'] },
-  { id:19, name:'Alpha Arbutin 2% Serum', brand:'Minimalist', category:'Serum', price:399, mrp:599, emoji:'🌟', badge:'', badgeBg:'', rating:4.6, reviews:1023, tags:['brightening','pigmentation'] },
-  { id:20, name:'Ceramide Barrier Repair Serum', brand:'DermIQ', category:'Serum', price:899, mrp:1399, emoji:'🧬', badge:'Premium', badgeBg:'#1A2E2B', rating:4.9, reviews:456, tags:['barrier','dry','sensitive'] },
-  { id:21, name:'Green Tea Foaming Cleanser', brand:'Dot & Key', category:'Cleanser', price:349, mrp:499, emoji:'🍵', badge:'', badgeBg:'', rating:4.5, reviews:678, tags:['antioxidant','oily'] },
-  { id:22, name:'Skin Brightening Kit (4 products)', brand:'DermIQ', category:'Kit', price:1999, mrp:3299, emoji:'🎁', badge:'Save 39%', badgeBg:'#2D5F5A', rating:4.9, reviews:234, tags:['brightening','gift','kit'] },
-]
+// Using centralized products from lib/products.ts
 
 const CATEGORIES_FILTER = ['All', 'Serum', 'Moisturiser', 'Sunscreen', 'Cleanser', 'Treatment', 'Toner', 'Kit', 'Gel', 'Mist']
 const BRANDS = ['All Brands', 'DermIQ', 'Minimalist', 'Plum', 'Pilgrim', 'Dot & Key']
@@ -87,7 +50,7 @@ export default function ShopPage() {
       const cart = JSON.parse(localStorage.getItem('dermiq_cart') || '[]')
       const idx = cart.findIndex((i: { id: number }) => i.id === product.id)
       if (idx >= 0) { cart[idx].qty += 1 } else {
-        cart.push({ id: product.id, name: product.name, brand: product.brand, price: product.price, emoji: product.emoji, qty: 1 })
+        cart.push({ id: product.id, name: product.name, brand: product.brand, price: product.price, image: (product as {image?:string}).image || '', qty: 1 })
       }
       localStorage.setItem('dermiq_cart', JSON.stringify(cart))
       window.dispatchEvent(new CustomEvent('dermiq_cart_updated'))
@@ -109,8 +72,8 @@ export default function ShopPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#fff' }}>
-      {/* Announcement bar */}
-      <div style={{ background: '#1A2E2B', color: '#fff', height: 36, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
+      {/* Announcement bar — fixed */}
+      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, background: '#1A2E2B', color: '#fff', height: 36, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
         <div className="ann-track">
           {[...ANN_ITEMS, ...ANN_ITEMS].map((item, i) => (
             <span key={i} style={{ padding: '0 40px', fontSize: 12, fontWeight: 500, fontFamily: 'DM Sans, sans-serif', whiteSpace: 'nowrap' }}>
@@ -280,8 +243,8 @@ export default function ShopPage() {
                       onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 6px 24px rgba(0,0,0,0.1)' }}
                       onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)' }}
                     >
-                      <div style={{ height: 160, background: 'linear-gradient(135deg, #F7F3EE, #E8E0D8)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                        <span style={{ fontSize: 56 }}>{product.emoji}</span>
+                      <div style={{ height: 160, background: '#F7F3EE', position: 'relative', overflow: 'hidden' }}>
+                        <Image src={(product as {image?:string}).image || ''} alt={product.name} fill sizes="200px" style={{ objectFit: 'cover' }} />
                         {product.badge && (
                           <span style={{ position: 'absolute', top: 8, left: 8, background: product.badgeBg, color: '#fff', fontSize: 9, fontWeight: 700, padding: '3px 7px', borderRadius: 20, fontFamily: 'DM Sans, sans-serif' }}>
                             {product.badge}

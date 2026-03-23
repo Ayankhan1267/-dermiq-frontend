@@ -1,52 +1,13 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import Navbar from '@/components/Navbar'
 import MobileToolbar from '@/components/MobileToolbar'
 import CartDrawer from '@/components/CartDrawer'
-
-interface Product {
-  id: number
-  name: string
-  brand: string
-  category: string
-  price: number
-  mrp: number
-  rating: number
-  reviews: number
-  emoji: string
-  badge: string
-  badgeBg: string
-}
-
-const BESTSELLERS: Product[] = [
-  { id:1, name:'Vitamin C Brightening Serum', brand:'DermIQ', category:'Serum', price:799, mrp:1299, rating:4.9, reviews:2341, emoji:'✨', badge:'Bestseller', badgeBg:'#1A2E2B' },
-  { id:2, name:'Hyaluronic Acid Deep Hydra Gel', brand:'DermIQ', category:'Moisturiser', price:649, mrp:999, rating:4.8, reviews:1876, emoji:'💧', badge:'New', badgeBg:'#D4856A' },
-  { id:3, name:'Mineral Sunscreen SPF 50+ PA++++', brand:'DermIQ', category:'Sunscreen', price:549, mrp:899, rating:4.9, reviews:3102, emoji:'☀️', badge:'SPF 50+', badgeBg:'#C8976A' },
-  { id:4, name:'Gentle Amino Acid Foaming Wash', brand:'DermIQ', category:'Cleanser', price:399, mrp:599, rating:4.7, reviews:1543, emoji:'🫧', badge:'', badgeBg:'' },
-  { id:5, name:'Retinol 0.2% Night Serum', brand:'Minimalist', category:'Serum', price:699, mrp:999, rating:4.6, reviews:987, emoji:'🌙', badge:'Derma Pick', badgeBg:'#2D5F5A' },
-  { id:6, name:'Ceramide & Hyaluronic Moisturiser', brand:'DermIQ', category:'Moisturiser', price:849, mrp:1299, rating:4.8, reviews:2103, emoji:'🏺', badge:'', badgeBg:'' },
-]
-
-const NEW_LAUNCHES: Product[] = [
-  { id:7, name:'Niacinamide 10% + Zinc Serum', brand:'Minimalist', category:'Serum', price:449, mrp:699, emoji:'🔬', badge:'New', badgeBg:'#D4856A', rating:4.7, reviews:432 },
-  { id:8, name:'Watermelon Glow Sleeping Mask', brand:'Dot & Key', category:'Treatment', price:699, mrp:999, emoji:'🍉', badge:'New', badgeBg:'#D4856A', rating:4.8, reviews:321 },
-  { id:9, name:'SPF 50 Matte Sunscreen', brand:'Pilgrim', category:'Sunscreen', price:599, mrp:899, emoji:'☀️', badge:'New', badgeBg:'#D4856A', rating:4.6, reviews:215 },
-  { id:10, name:'Kojic Acid Dark Spot Serum', brand:'Plum', category:'Serum', price:549, mrp:799, emoji:'✨', badge:'New', badgeBg:'#D4856A', rating:4.5, reviews:189 },
-  { id:11, name:'Peptide Complex Eye Cream', brand:'DermIQ', category:'Treatment', price:999, mrp:1499, emoji:'👁️', badge:'Launch', badgeBg:'#3D7A74', rating:4.9, reviews:87 },
-  { id:12, name:'AHA 30% + BHA 2% Peeling Solution', brand:'Minimalist', category:'Treatment', price:549, mrp:799, emoji:'⚗️', badge:'Trending', badgeBg:'#C8976A', rating:4.7, reviews:654 },
-]
-
-const BUDGET: Product[] = [
-  { id:13, name:'Salicylic Acid 2% Face Wash', brand:'Minimalist', category:'Cleanser', price:299, mrp:499, emoji:'🫧', badge:'', badgeBg:'', rating:4.6, reviews:2341 },
-  { id:14, name:'Vitamin C 10% Face Serum', brand:'Plum', category:'Serum', price:449, mrp:699, emoji:'🍊', badge:'', badgeBg:'', rating:4.5, reviews:1234 },
-  { id:15, name:'SPF 30 PA+++ Sunscreen', brand:'Pilgrim', category:'Sunscreen', price:399, mrp:599, emoji:'🌤️', badge:'', badgeBg:'', rating:4.4, reviews:876 },
-  { id:16, name:'Rose & Aloe Toner', brand:'Plum', category:'Toner', price:349, mrp:499, emoji:'🌹', badge:'', badgeBg:'', rating:4.5, reviews:543 },
-  { id:17, name:'Niacinamide Face Mist', brand:'Dot & Key', category:'Mist', price:399, mrp:599, emoji:'💨', badge:'', badgeBg:'', rating:4.6, reviews:432 },
-  { id:18, name:'Aloe Vera Soothing Gel', brand:'DermIQ', category:'Gel', price:199, mrp:349, emoji:'🌿', badge:'', badgeBg:'', rating:4.7, reviews:1876 },
-]
+import { ALL_PRODUCTS, BESTSELLERS, NEW_LAUNCHES, BUDGET, type Product } from '@/lib/products'
 
 const ANN_ITEMS = [
   '✨ FREE shipping on orders above ₹799',
@@ -105,17 +66,17 @@ function ProductCard({ product, onAddToCart }: { product: Product, onAddToCart: 
       onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 6px 24px rgba(0,0,0,0.1)' }}
       onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)' }}
     >
-      {/* Image area */}
-      <div style={{ height: 160, background: 'linear-gradient(135deg, #F7F3EE, #E8E0D8)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-        <span style={{ fontSize: 56 }}>{product.emoji}</span>
+      {/* Real product image */}
+      <div style={{ height: 160, position: 'relative', background: '#F7F3EE', overflow: 'hidden' }}>
+        <Image src={product.image} alt={product.name} fill sizes="175px" style={{ objectFit: 'cover' }} />
         {product.badge && (
-          <span style={{ position: 'absolute', top: 8, left: 8, background: product.badgeBg, color: '#fff', fontSize: 9, fontWeight: 700, padding: '3px 7px', borderRadius: 20, fontFamily: 'DM Sans, sans-serif', letterSpacing: 0.3 }}>
+          <span style={{ position: 'absolute', top: 8, left: 8, background: product.badgeBg, color: '#fff', fontSize: 9, fontWeight: 700, padding: '3px 7px', borderRadius: 20, fontFamily: 'DM Sans, sans-serif', letterSpacing: 0.3, zIndex: 1 }}>
             {product.badge}
           </span>
         )}
         <button
           onClick={e => { e.stopPropagation() }}
-          style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,0.9)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,0.9)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1 }}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4856A" strokeWidth="2">
             <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
@@ -204,7 +165,7 @@ export default function HomePage() {
       if (idx >= 0) {
         cart[idx].qty += 1
       } else {
-        cart.push({ id: product.id, name: product.name, brand: product.brand, price: product.price, emoji: product.emoji, qty: 1 })
+        cart.push({ id: product.id, name: product.name, brand: product.brand, price: product.price, image: product.image, qty: 1 })
       }
       localStorage.setItem('dermiq_cart', JSON.stringify(cart))
       window.dispatchEvent(new CustomEvent('dermiq_cart_updated'))
@@ -216,8 +177,8 @@ export default function HomePage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#fff' }}>
-      {/* Announcement bar */}
-      <div style={{ background: '#1A2E2B', color: '#fff', height: 36, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
+      {/* Announcement bar — fixed at very top */}
+      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, background: '#1A2E2B', color: '#fff', height: 36, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
         <div className="ann-track">
           {[...ANN_ITEMS, ...ANN_ITEMS].map((item, i) => (
             <span key={i} style={{ padding: '0 40px', fontSize: 12, fontWeight: 500, fontFamily: 'DM Sans, sans-serif', whiteSpace: 'nowrap' }}>
@@ -228,11 +189,14 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Navbar */}
+      {/* Navbar — fixed below announcement bar */}
       <Navbar activePage="home" />
 
+      {/* Spacer for fixed announcement bar + navbar */}
+      <div style={{ height: 106 }} />
+
       {/* Category nav */}
-      <div className="cat-nav" style={{ marginTop: 36 }}>
+      <div className="cat-nav">
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 20px' }}>
           <div style={{ display: 'flex', gap: 6, overflowX: 'auto', padding: '10px 0', scrollbarWidth: 'none' }} className="no-scrollbar">
             {CATEGORIES.map(cat => (
@@ -262,7 +226,7 @@ export default function HomePage() {
       </div>
 
       {/* Hero */}
-      <section style={{ background: '#F7F3EE', minHeight: '90vh', display: 'flex', alignItems: 'center', paddingTop: 20 }}>
+      <section style={{ background: '#F7F3EE', minHeight: '90vh', display: 'flex', alignItems: 'center' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '60px 20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 60, alignItems: 'center', width: '100%' }} className="hero-grid">
           <style>{`@media(max-width:768px){.hero-grid{grid-template-columns:1fr!important;gap:40px!important;text-align:center}}`}</style>
 

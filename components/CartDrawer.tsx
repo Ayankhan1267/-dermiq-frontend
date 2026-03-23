@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 
@@ -8,7 +9,8 @@ interface CartItem {
   name: string
   brand: string
   price: number
-  emoji: string
+  image?: string
+  emoji?: string
   qty: number
 }
 
@@ -147,18 +149,12 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                   background: '#FAFAF8',
                 }}>
                   {/* Product image */}
-                  <div style={{
-                    width: 72,
-                    height: 72,
-                    borderRadius: 10,
-                    background: 'linear-gradient(135deg, #F7F3EE, #E8E0D8)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 32,
-                    flexShrink: 0,
-                  }}>
-                    {item.emoji}
+                  <div style={{ width: 72, height: 72, borderRadius: 10, overflow: 'hidden', background: '#F7F3EE', flexShrink: 0, position: 'relative' }}>
+                    {item.image ? (
+                      <Image src={item.image} alt={item.name} fill sizes="72px" style={{ objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30 }}>{item.emoji || '🧴'}</div>
+                    )}
                   </div>
 
                   {/* Details */}

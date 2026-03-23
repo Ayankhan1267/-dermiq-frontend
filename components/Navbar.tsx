@@ -53,15 +53,15 @@ export default function Navbar({ activePage }: { activePage?: string }) {
       <nav
         style={{
           position: 'fixed',
-          top: 0,
+          top: 36,
           left: 0,
           right: 0,
-          zIndex: 50,
+          zIndex: 999,
           height: 70,
-          transition: 'all 0.3s',
-          background: scrolled ? 'rgba(255,255,255,0.95)' : 'transparent',
+          transition: 'background 0.3s, box-shadow 0.3s',
+          background: scrolled ? 'rgba(255,255,255,0.97)' : '#fff',
           backdropFilter: scrolled ? 'blur(12px)' : 'none',
-          borderBottom: scrolled ? '1px solid #E8E0D8' : 'none',
+          borderBottom: '1px solid #E8E0D8',
           boxShadow: scrolled ? '0 2px 20px rgba(0,0,0,0.06)' : 'none',
         }}
       >
