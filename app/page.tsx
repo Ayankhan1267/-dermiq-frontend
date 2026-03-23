@@ -9,6 +9,8 @@ import MobileToolbar from '@/components/MobileToolbar'
 import CartDrawer from '@/components/CartDrawer'
 import { ALL_PRODUCTS, BESTSELLERS, NEW_LAUNCHES, BUDGET, type Product } from '@/lib/products'
 
+const C = { teal: '#2D5F5A', teal2: '#3D7A74', dark: '#1A2E2B', mu: '#6B7280', border: '#E8E0D8', cream: '#F7F3EE', bg: '#FAFAF8', accent: '#C8976A', green: '#10B981', red: '#EF4444', gold: '#D4A853' }
+
 const ANN_ITEMS = [
   '✨ FREE shipping on orders above ₹799',
   'Use code DERMIQ15 for 15% off',
@@ -69,19 +71,20 @@ const TESTIMONIALS = [
   { name: 'Aisha K.', skin: 'Combination', review: 'Took the AI skin quiz and got a perfect routine. The recommendations were spot-on. My skin is glowing!', rating: 5, emoji: '✨' },
 ]
 
-function ProductCard({ product, onAddToCart }: { product: Product, onAddToCart: (p: Product) => void }) {
+function ProductCard({ product, onAddToCart, cardWidth }: { product: Product, onAddToCart: (p: Product) => void, cardWidth?: number }) {
   const router = useRouter()
   const disc = Math.round((1 - product.price / product.mrp) * 100)
+  const w = cardWidth || 175
 
   return (
     <div
-      style={{ width: 175, flexShrink: 0, borderRadius: 16, border: '1px solid #E8E0D8', background: '#fff', cursor: 'pointer', overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', transition: 'transform 0.15s, box-shadow 0.15s' }}
+      style={{ width: w, flexShrink: 0, borderRadius: 16, border: '1px solid #E8E0D8', background: '#fff', cursor: 'pointer', overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', transition: 'transform 0.15s, box-shadow 0.15s' }}
       onClick={() => router.push(`/product/${product.id}`)}
       onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 6px 24px rgba(0,0,0,0.1)' }}
       onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)' }}
     >
       {/* Real product image */}
-      <div style={{ height: 160, position: 'relative', background: '#F7F3EE', overflow: 'hidden' }}>
+      <div style={{ height: w < 150 ? 130 : 160, position: 'relative', background: '#F7F3EE', overflow: 'hidden' }}>
         <Image src={product.image} alt={product.name} fill sizes="175px" style={{ objectFit: 'cover' }} />
         {product.badge && (
           <span style={{ position: 'absolute', top: 8, left: 8, background: product.badgeBg, color: '#fff', fontSize: 9, fontWeight: 700, padding: '3px 7px', borderRadius: 20, fontFamily: 'DM Sans, sans-serif', letterSpacing: 0.3, zIndex: 1 }}>
@@ -163,12 +166,19 @@ function ProductSlider({ products, onAddToCart }: { products: Product[], onAddTo
 export default function HomePage() {
   const [cartOpen, setCartOpen] = useState(false)
   const [activeCategory, setActiveCategory] = useState('All Products')
+  const [isMobile, setIsMobile] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
     const handler = () => setCartOpen(true)
     window.addEventListener('dermiq_open_cart', handler)
-    return () => window.removeEventListener('dermiq_open_cart', handler)
+    return () => {
+      window.removeEventListener('resize', check)
+      window.removeEventListener('dermiq_open_cart', handler)
+    }
   }, [])
 
   const addToCart = (product: Product) => {
@@ -240,9 +250,8 @@ export default function HomePage() {
       </div>
 
       {/* Hero */}
-      <section style={{ background: '#F7F3EE', minHeight: '90vh', display: 'flex', alignItems: 'center' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '60px 20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 60, alignItems: 'center', width: '100%' }} className="hero-grid">
-          <style>{`@media(max-width:768px){.hero-grid{grid-template-columns:1fr!important;gap:40px!important;text-align:center}}`}</style>
+      <section style={{ background: '#F7F3EE', minHeight: isMobile ? 'auto' : '90vh', display: 'flex', alignItems: 'center' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: isMobile ? '40px 20px' : '60px 20px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 32 : 60, alignItems: 'center', width: '100%', textAlign: isMobile ? 'center' : 'left' }}>
 
           {/* Left */}
           <div>
@@ -259,28 +268,43 @@ export default function HomePage() {
             </p>
 
             {/* Buttons */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 40 }}>
-              <button
-                onClick={() => router.push('/skin-quiz')}
-                className="btn-know-skin"
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: isMobile ? 24 : 40 }}>
+              <Link
+                href="/know-your-skin"
+                style={{ padding: isMobile ? '14px 22px' : '16px 32px', borderRadius: 14, background: `linear-gradient(135deg,${C.teal},${C.teal2})`, color: '#fff', fontSize: isMobile ? 15 : 16, fontWeight: 700, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', textDecoration: 'none', boxShadow: '0 4px 20px rgba(45,95,90,0.35)', display: 'inline-flex', alignItems: 'center', gap: 8, width: isMobile ? '100%' : 'auto', justifyContent: isMobile ? 'center' : 'flex-start' }}
               >
-                🧠 Know Your Skin
-              </button>
-              <Link href="/shop" className="btn-primary">
-                Explore Products
+                🔬 Know Your Skin — Free
               </Link>
-              <button
-                onClick={() => router.push('/routine')}
-                style={{ padding: '14px 24px', borderRadius: 12, border: '1.5px solid #1A2E2B', background: 'transparent', color: '#1A2E2B', fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.15s' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = '#1A2E2B'; (e.currentTarget as HTMLButtonElement).style.color = '#fff' }}
-                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = '#1A2E2B' }}
+              <Link href="/shop"
+                style={{ padding: isMobile ? '13px 22px' : '14px 24px', borderRadius: 12, background: C.accent, color: '#fff', fontSize: 15, fontWeight: 600, fontFamily: 'DM Sans, sans-serif', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6, width: isMobile ? '100%' : 'auto', justifyContent: isMobile ? 'center' : 'flex-start' }}
               >
-                Build My Routine
-              </button>
+                🛒 Explore Products
+              </Link>
+              <Link href="/consultation"
+                style={{ padding: isMobile ? '13px 22px' : '14px 24px', borderRadius: 12, border: '1.5px solid #1A2E2B', background: 'transparent', color: '#1A2E2B', fontSize: 15, fontWeight: 600, fontFamily: 'DM Sans, sans-serif', textDecoration: 'none', display: isMobile ? 'none' : 'inline-flex', alignItems: 'center', gap: 6 }}
+              >
+                👨‍⚕️ Free Consultation
+              </Link>
+            </div>
+
+            {/* Quick links row */}
+            <div style={{ display: 'flex', gap: isMobile ? 8 : 12, flexWrap: isMobile ? 'nowrap' : 'wrap', overflowX: isMobile ? 'auto' : 'visible', paddingBottom: isMobile ? 4 : 0 }}>
+              {[
+                { icon: '🔬', label: 'Know Your Skin', href: '/know-your-skin' },
+                { icon: '👨‍⚕️', label: 'Free Consultation', href: '/consultation' },
+                { icon: '🛒', label: 'Shop', href: '/shop' },
+                { icon: '📋', label: 'My Routine', href: '/routine' },
+                { icon: '📦', label: 'Track Order', href: '/order-tracking' },
+              ].map(item => (
+                <Link key={item.href} href={item.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 20, background: 'rgba(45,95,90,0.08)', border: '1px solid rgba(45,95,90,0.15)', color: C.teal, fontSize: 12, fontWeight: 600, fontFamily: 'DM Sans, sans-serif', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                  <span>{item.icon}</span>
+                  {item.label}
+                </Link>
+              ))}
             </div>
 
             {/* Stats */}
-            <div style={{ display: 'flex', gap: 32 }}>
+            <div style={{ display: 'flex', gap: isMobile ? 20 : 32, justifyContent: isMobile ? 'center' : 'flex-start', marginTop: isMobile ? 16 : 0 }}>
               {[
                 { val: '50K+', label: 'Happy Customers' },
                 { val: '4.9★', label: 'Average Rating' },
@@ -533,6 +557,44 @@ export default function HomePage() {
                 <div style={{ fontSize: 36, marginBottom: 12 }}>{ing.emoji}</div>
                 <h3 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 16, fontWeight: 700, color: '#1A2E2B', marginBottom: 6 }}>{ing.name}</h3>
                 <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#6B7280', lineHeight: 1.5 }}>{ing.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section style={{ padding: isMobile ? '48px 0' : '80px 0', background: '#fff' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 20px' }}>
+          <div style={{ textAlign: 'center', marginBottom: isMobile ? 32 : 48 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: C.accent, fontFamily: 'DM Sans, sans-serif', letterSpacing: 1, textTransform: 'uppercase' }}>Simple 3 Steps</span>
+            <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: isMobile ? 26 : 36, color: C.dark, margin: '8px 0 12px' }}>How DermIQ Works</h2>
+            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: C.mu, maxWidth: 460, margin: '0 auto' }}>Science-backed skincare starts with knowing your skin.</p>
+          </div>
+          <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'flex-start', gap: isMobile ? 16 : 0, justifyContent: 'center' }}>
+            {[
+              { step: '01', icon: '🔬', title: 'Take AI Skin Test', desc: 'Answer 30 questions about your skin in 2 minutes. Our AI analyses your skin biology.', href: '/know-your-skin', cta: 'Start Free' },
+              { step: '02', icon: '👨‍⚕️', title: 'Get Free Consultation', desc: 'Connect with certified dermatologists. Get personalised advice for your concerns.', href: '/consultation', cta: 'Book Now' },
+              { step: '03', icon: '🛒', title: 'Shop Recommended Products', desc: 'Get a curated routine with products matched to your exact skin profile.', href: '/shop', cta: 'Shop Now' },
+            ].map((item, i) => (
+              <div key={i} style={{ display: 'flex', flexDirection: isMobile ? 'row' : 'column', alignItems: isMobile ? 'flex-start' : 'center', gap: isMobile ? 16 : 0, flex: 1, position: 'relative' }}>
+                {/* Connector arrow (desktop only) */}
+                {i < 2 && !isMobile && (
+                  <div style={{ position: 'absolute', top: 40, right: -24, fontSize: 24, color: C.border, zIndex: 1 }}>→</div>
+                )}
+                <div style={{ textAlign: isMobile ? 'left' : 'center', padding: isMobile ? '20px' : '32px 24px', background: C.cream, borderRadius: 20, border: `1px solid ${C.border}`, flex: 1, width: isMobile ? '100%' : 'auto' }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 56, height: 56, borderRadius: '50%', background: C.teal, fontSize: 24, marginBottom: 16, flexShrink: 0 }}>
+                    {item.icon}
+                  </div>
+                  <div style={{ marginLeft: isMobile ? 0 : 'auto', marginRight: isMobile ? 0 : 'auto' }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: C.accent, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>Step {item.step}</div>
+                    <h3 style={{ fontFamily: 'Playfair Display, serif', fontSize: 18, color: C.dark, marginBottom: 8 }}>{item.title}</h3>
+                    <p style={{ fontSize: 13, color: C.mu, lineHeight: 1.6, marginBottom: 16 }}>{item.desc}</p>
+                    <Link href={item.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 18px', borderRadius: 10, background: C.teal, color: '#fff', fontSize: 13, fontWeight: 700, fontFamily: 'DM Sans, sans-serif', textDecoration: 'none' }}>
+                      {item.cta} →
+                    </Link>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
