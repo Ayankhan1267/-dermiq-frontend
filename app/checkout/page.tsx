@@ -45,12 +45,18 @@ export default function CheckoutPage() {
   })
   const [errors, setErrors] = useState<Partial<Address>>({})
 
+  const [isMobile, setIsMobile] = useState(false)
+
   useEffect(() => {
     setMounted(true)
     const saved = localStorage.getItem('dermiq_cart')
     if (saved) {
       try { setCart(JSON.parse(saved)) } catch {}
     }
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
   }, [])
 
   const cartProducts = cart.map(item => {
@@ -190,7 +196,7 @@ export default function CheckoutPage() {
             ))}
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 24, alignItems: 'flex-start' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 380px', gap: 24, alignItems: 'flex-start' }}>
             {/* Step 1: Address */}
             {step === 1 && (
               <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #E8E0D8', padding: 28 }}>

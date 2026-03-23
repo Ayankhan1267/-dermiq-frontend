@@ -47,6 +47,7 @@ export default function CartPage() {
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null)
   const [couponError, setCouponError] = useState('')
   const [mounted, setMounted] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -54,6 +55,10 @@ export default function CartPage() {
     if (saved) {
       try { setCart(JSON.parse(saved)) } catch {}
     }
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
   }, [])
 
   function saveCart(updated: CartItem[]) {
@@ -147,7 +152,7 @@ export default function CartPage() {
             </div>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 24, alignItems: 'flex-start' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 380px', gap: 24, alignItems: 'flex-start' }}>
             {/* Cart Items */}
             <div>
               {/* Offers banner */}
