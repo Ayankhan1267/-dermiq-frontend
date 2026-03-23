@@ -39,14 +39,21 @@ export default function ProductPage() {
   const [showSticky, setShowSticky] = useState(false)
   const [reviewFilter, setReviewFilter] = useState(0)
   const [helpfulVoted, setHelpfulVoted] = useState<number[]>([])
+  const [isMobile, setIsMobile] = useState(false)
   const heroRef = useRef<HTMLDivElement>(null)
 
   const product = getProductById(Number(id))
 
   useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
     const handler = () => setCartOpen(true)
     window.addEventListener('dermiq_open_cart', handler)
-    return () => window.removeEventListener('dermiq_open_cart', handler)
+    return () => {
+      window.removeEventListener('resize', check)
+      window.removeEventListener('dermiq_open_cart', handler)
+    }
   }, [])
 
   // Simulate AI match score from skin profile

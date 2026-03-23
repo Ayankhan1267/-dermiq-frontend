@@ -36,12 +36,20 @@ export default function ShopPage() {
   const [sortBy, setSortBy] = useState('default')
   const [searchQuery, setSearchQuery] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
     const handler = () => setCartOpen(true)
     window.addEventListener('dermiq_open_cart', handler)
-    return () => window.removeEventListener('dermiq_open_cart', handler)
+    return () => {
+      window.removeEventListener('resize', check)
+      window.removeEventListener('dermiq_open_cart', handler)
+    }
   }, [])
 
   const addToCart = (product: Product) => {
@@ -115,11 +123,11 @@ export default function ShopPage() {
           </div>
         </div>
 
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '24px 20px', display: 'grid', gridTemplateColumns: '220px 1fr', gap: 28, alignItems: 'start' }} className="shop-layout">
-          <style>{`@media(max-width:768px){.shop-layout{grid-template-columns:1fr!important} .desktop-sidebar{display:none!important}}`}</style>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '24px 20px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '220px 1fr', gap: 28, alignItems: 'start' }}>
 
-          {/* Sidebar */}
-          <div className="desktop-sidebar" style={{ position: 'sticky', top: 130, background: '#fff', borderRadius: 16, border: '1px solid #E8E0D8', padding: 20 }}>
+          {/* Sidebar — desktop only */}
+          {!isMobile && (
+          <div style={{ position: 'sticky', top: 130, background: '#fff', borderRadius: 16, border: '1px solid #E8E0D8', padding: 20 }}>
             {/* Search */}
             <div style={{ marginBottom: 24 }}>
               <label style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 700, color: '#1A2E2B', display: 'block', marginBottom: 8 }}>Search</label>
@@ -176,53 +184,56 @@ export default function ShopPage() {
               🌿 All DermIQ products are dermatologist-tested and cruelty-free.
             </div>
           </div>
+          )}
 
           {/* Main content */}
           <div>
-            {/* Mobile filter row */}
-            <div className="md:hidden" style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto' }} >
-              <div style={{ position: 'relative', flex: 1 }}>
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: 10, border: '1.5px solid #E8E0D8', fontSize: 13, fontFamily: 'DM Sans, sans-serif', outline: 'none' }}
-                />
-                <svg style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-              </div>
-              <select
-                value={sortBy}
-                onChange={e => setSortBy(e.target.value)}
-                style={{ padding: '10px 12px', borderRadius: 10, border: '1.5px solid #E8E0D8', fontSize: 13, fontFamily: 'DM Sans, sans-serif', outline: 'none', background: '#fff', cursor: 'pointer', flexShrink: 0 }}
-              >
-                {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </select>
-            </div>
-
-            {/* Brand filter chips - mobile */}
-            <div className="md:hidden" style={{ display: 'flex', gap: 6, overflowX: 'auto', marginBottom: 16, paddingBottom: 4 }}>
-              {BRANDS.map(brand => (
-                <button
-                  key={brand}
-                  onClick={() => setSelectedBrand(brand)}
-                  style={{
-                    flexShrink: 0, padding: '6px 14px', borderRadius: 20,
-                    border: selectedBrand === brand ? '1.5px solid #2D5F5A' : '1.5px solid #E8E0D8',
-                    background: selectedBrand === brand ? '#2D5F5A' : '#fff',
-                    color: selectedBrand === brand ? '#fff' : '#1A1A1A',
-                    fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', whiteSpace: 'nowrap',
-                  }}
-                >{brand}</button>
-              ))}
-            </div>
-
             {/* Results count */}
             <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#6B7280', marginBottom: 20 }}>
               Showing {filtered.length} of {ALL_PRODUCTS.length} products
             </p>
+
+            {/* Mobile filter button */}
+            {isMobile && (
+              <div style={{ display: 'flex', gap: 8, marginBottom: 16, alignItems: 'center' }}>
+                <button
+                  onClick={() => setFilterSheetOpen(true)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderRadius: 10, border: '1.5px solid #E8E0D8', background: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 600, color: '#1A2E2B', fontFamily: 'DM Sans, sans-serif' }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+                  Filter & Sort
+                </button>
+                <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={{ flex: 1, padding: '10px 12px', borderRadius: 10, border: '1.5px solid #E8E0D8', fontSize: 13, fontFamily: 'DM Sans, sans-serif', outline: 'none', background: '#fff', cursor: 'pointer' }}>
+                  {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
+            )}
+
+            {/* Bottom sheet filter for mobile */}
+            {filterSheetOpen && isMobile && (
+              <div style={{ position: 'fixed', inset: 0, zIndex: 500 }}>
+                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)' }} onClick={() => setFilterSheetOpen(false)} />
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px', maxHeight: '80vh', overflowY: 'auto' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                    <h3 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 18, fontWeight: 700, color: '#1A2E2B' }}>Filters</h3>
+                    <button onClick={() => setFilterSheetOpen(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 20, color: '#6B7280' }}>✕</button>
+                  </div>
+                  <div style={{ marginBottom: 20 }}>
+                    <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 700, color: '#1A2E2B', marginBottom: 10 }}>Brand</p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                      {BRANDS.map(brand => (
+                        <button key={brand} onClick={() => setSelectedBrand(brand)} style={{ padding: '8px 14px', borderRadius: 20, border: selectedBrand === brand ? '1.5px solid #2D5F5A' : '1.5px solid #E8E0D8', background: selectedBrand === brand ? '#2D5F5A' : '#fff', color: selectedBrand === brand ? '#fff' : '#1A1A1A', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                          {brand}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <button onClick={() => setFilterSheetOpen(false)} style={{ width: '100%', padding: '14px', borderRadius: 12, background: '#2D5F5A', color: '#fff', border: 'none', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                    Apply Filters
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Product grid */}
             {filtered.length === 0 ? (
@@ -232,7 +243,7 @@ export default function ShopPage() {
                 <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#6B7280' }}>Try adjusting your filters or search query</p>
               </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(175px, 1fr))', gap: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2,1fr)' : 'repeat(auto-fill, minmax(175px, 1fr))', gap: isMobile ? 12 : 16 }}>
                 {filtered.map(product => {
                   const disc = Math.round((1 - product.price / product.mrp) * 100)
                   return (

@@ -102,11 +102,18 @@ export default function SpecialistsPage() {
   const [bookForm, setBookForm] = useState({ name: '', email: '', phone: '', date: '', concern: '', mode: 'video' })
   const [bookingDone, setBookingDone] = useState(false)
   const [sortBy, setSortBy] = useState<'rating' | 'price_low' | 'price_high' | 'experience'>('rating')
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
     const handler = () => setCartOpen(true)
     window.addEventListener('dermiq_open_cart', handler)
-    return () => window.removeEventListener('dermiq_open_cart', handler)
+    return () => {
+      window.removeEventListener('resize', check)
+      window.removeEventListener('dermiq_open_cart', handler)
+    }
   }, [])
 
   // Try to load from Supabase
@@ -212,7 +219,7 @@ export default function SpecialistsPage() {
             </div>
 
             {/* Speciality pills */}
-            <div style={{ display: 'flex', gap: 8, marginBottom: 28, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 28, flexWrap: isMobile ? 'nowrap' : 'wrap', overflowX: isMobile ? 'auto' : 'visible', paddingBottom: isMobile ? 4 : 0 }}>
               {SPECIALITIES.map(s => (
                 <button key={s} onClick={() => setFilter(s)} style={{ padding: '7px 16px', borderRadius: 20, border: `1.5px solid ${filter === s ? '#2D5F5A' : '#E8E0D8'}`, background: filter === s ? 'rgba(45,95,90,0.08)' : '#fff', color: filter === s ? '#2D5F5A' : '#6B7280', fontSize: 13, fontWeight: filter === s ? 700 : 500, cursor: 'pointer', fontFamily: 'DM Sans,sans-serif', transition: 'all 0.15s' }}>
                   {s}
@@ -438,8 +445,8 @@ export default function SpecialistsPage() {
 
       {/* ── Booking Modal ─────────────────────────────────────────── */}
       {bookModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-          <div style={{ background: '#fff', borderRadius: 24, padding: 32, width: '100%', maxWidth: 500, maxHeight: '90vh', overflowY: 'auto' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 1000, display: 'flex', alignItems: isMobile ? 'flex-end' : 'center', justifyContent: 'center', padding: isMobile ? 0 : 20 }}>
+          <div style={{ background: '#fff', borderRadius: isMobile ? '20px 20px 0 0' : 24, padding: isMobile ? '28px 20px' : 32, width: '100%', maxWidth: isMobile ? '100%' : 500, maxHeight: isMobile ? '95vh' : '90vh', overflowY: 'auto' }}>
             {!bookingDone ? (
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
