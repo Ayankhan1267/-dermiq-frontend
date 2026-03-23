@@ -548,7 +548,7 @@ export default function IngredientDetailPage() {
                   {ingredient.pairsWith.map((pair, i) => (
                     <div key={i} style={{ background: '#F0FDF4', borderRadius: 12, padding: '14px 16px', border: `1px solid #BBF7D0` }}>
                       <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, fontWeight: 600, color: '#166534', marginBottom: 4 }}>{pair.name}</div>
-                      <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: '#4ADE80', color: '#15803D' }}>{pair.reason}</div>
+                      <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: '#15803D' }}>{pair.reason}</div>
                     </div>
                   ))}
                 </div>
