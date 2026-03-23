@@ -180,7 +180,8 @@ export default function AccountPage() {
             </div>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 24, alignItems: 'flex-start' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 24, alignItems: 'flex-start' }} className="account-grid">
+            <style>{`@media(max-width:768px){.account-grid{grid-template-columns:1fr!important}}`}</style>
             {/* Sidebar */}
             <div>
               <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8E0D8', padding: 20, marginBottom: 16, textAlign: 'center' }}>

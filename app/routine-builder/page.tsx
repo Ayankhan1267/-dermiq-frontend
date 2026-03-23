@@ -439,6 +439,7 @@ export default function RoutineBuilderPage() {
           {/* ── Builder Columns ──────────────────────────────────────────── */}
           <section style={{ padding: '28px 0' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 300px', gap: 24, alignItems: 'start' }} className="routine-grid">
+              <style>{`@media(max-width:768px){.routine-grid{grid-template-columns:1fr!important}}`}</style>
 
               {/* AM Column */}
               <div>

@@ -221,7 +221,8 @@ export default function ReferPage() {
           {/* ── How It Works ────────────────────────────────────────────── */}
           <section style={{ padding: '56px 0' }}>
             <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: 28, color: C.dark, textAlign: 'center', marginBottom: 36 }}>How It Works</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }} className="refer-steps">
+              <style>{`@media(max-width:768px){.refer-steps{grid-template-columns:1fr!important}}`}</style>
               {steps.map((step, i) => (
                 <div key={i} style={{ background: '#fff', borderRadius: 16, padding: '32px 24px', border: `1px solid ${C.border}`, textAlign: 'center', position: 'relative' }}>
                   {/* Step connector */}
@@ -293,7 +294,8 @@ export default function ReferPage() {
                 </div>
 
                 {/* Stats */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28 }} className="refer-stats">
+                  <style>{`@media(max-width:768px){.refer-stats{grid-template-columns:repeat(2,1fr)!important}}`}</style>
                   {stats.map((stat, i) => (
                     <div key={i} style={{ background: '#fff', borderRadius: 14, padding: '22px 18px', border: `1px solid ${C.border}`, textAlign: 'center' }}>
                       <div style={{ fontSize: 28, marginBottom: 8 }}>{stat.icon}</div>
