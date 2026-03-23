@@ -1306,6 +1306,38 @@ export default function KnowYourSkinPage() {
         created_at: r.generatedAt,
       })
     } catch { /* fail silently — offline OK */ }
+
+    // Track referral conversion
+    try {
+      const refSlug = typeof window !== 'undefined' ? localStorage.getItem('dermiq_ref_slug') : null
+      if (refSlug) {
+        const { data: inf } = await supabase
+          .from('dermiq_influencers')
+          .select('id, commission_per_lead, total_analyses, total_earnings, pending_payout')
+          .eq('referral_slug', refSlug)
+          .single()
+        if (inf) {
+          await supabase.from('dermiq_referral_events').insert({
+            influencer_id: inf.id,
+            influencer_slug: refSlug,
+            event_type: 'analysis',
+            user_name: r.userInfo.name,
+            commission_earned: inf.commission_per_lead,
+          })
+          try {
+            await supabase.rpc('increment_influencer_stats', { p_id: inf.id, p_analyses: 1, p_earnings: inf.commission_per_lead })
+          } catch {
+            await supabase.from('dermiq_influencers').update({
+              total_analyses: (inf.total_analyses || 0) + 1,
+              total_earnings: (Number(inf.total_earnings) || 0) + Number(inf.commission_per_lead),
+              pending_payout: (Number(inf.pending_payout) || 0) + Number(inf.commission_per_lead),
+              updated_at: new Date().toISOString(),
+            }).eq('id', inf.id)
+          }
+        }
+      }
+    } catch { /* referral tracking is non-critical */ }
+
     goTo(5)
   }
 
