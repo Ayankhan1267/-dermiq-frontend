@@ -135,30 +135,33 @@ function ProductCard({ product, onAddToCart, cardWidth }: { product: Product, on
   )
 }
 
-function ProductSlider({ products, onAddToCart }: { products: Product[], onAddToCart: (p: Product) => void }) {
+function ProductSlider({ products, onAddToCart, isMobile }: { products: Product[], onAddToCart: (p: Product) => void, isMobile?: boolean }) {
   const ref = useRef<HTMLDivElement>(null)
+  const cardW = isMobile ? 140 : 175
   const scroll = (dir: number) => {
-    ref.current?.scrollBy({ left: dir * (175 + 14) * 2, behavior: 'smooth' })
+    ref.current?.scrollBy({ left: dir * (cardW + 14) * 2, behavior: 'smooth' })
   }
   return (
     <div style={{ position: 'relative' }}>
-      <button
-        onClick={() => scroll(-1)}
-        className="hidden md:flex"
-        style={{ position: 'absolute', left: -18, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 36, height: 36, borderRadius: '50%', background: '#fff', border: '1.5px solid #E8E0D8', cursor: 'pointer', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.1)' }}
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A2E2B" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
+      {!isMobile && (
+        <button
+          onClick={() => scroll(-1)}
+          style={{ position: 'absolute', left: -18, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 36, height: 36, borderRadius: '50%', background: '#fff', border: '1.5px solid #E8E0D8', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.1)' }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A2E2B" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+      )}
       <div className="pslider" ref={ref}>
-        {products.map(p => <ProductCard key={p.id} product={p} onAddToCart={onAddToCart} />)}
+        {products.map(p => <ProductCard key={p.id} product={p} onAddToCart={onAddToCart} cardWidth={cardW} />)}
       </div>
-      <button
-        onClick={() => scroll(1)}
-        className="hidden md:flex"
-        style={{ position: 'absolute', right: -18, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 36, height: 36, borderRadius: '50%', background: '#fff', border: '1.5px solid #E8E0D8', cursor: 'pointer', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.1)' }}
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A2E2B" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
+      {!isMobile && (
+        <button
+          onClick={() => scroll(1)}
+          style={{ position: 'absolute', right: -18, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 36, height: 36, borderRadius: '50%', background: '#fff', border: '1.5px solid #E8E0D8', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.1)' }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A2E2B" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      )}
     </div>
   )
 }
@@ -354,8 +357,7 @@ export default function HomePage() {
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 20px' }}>
           <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: 28, color: '#1A2E2B', marginBottom: 8, textAlign: 'center' }}>Shop by Category</h2>
           <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: '#6B7280', textAlign: 'center', marginBottom: 36 }}>Find exactly what your skin needs</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }} className="cat-grid">
-            <style>{`@media(max-width:640px){.cat-grid{grid-template-columns:repeat(4,1fr)!important;gap:10px!important}}`}</style>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2,1fr)' : 'repeat(4, 1fr)', gap: isMobile ? 10 : 16 }}>
             {CATEGORY_LINKS.map(cat => (
               <Link key={cat.label} href={cat.href} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '20px 10px', borderRadius: 16, background: cat.bg, textDecoration: 'none', transition: 'transform 0.15s', border: '1px solid transparent' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-3px)' }}
@@ -398,7 +400,7 @@ export default function HomePage() {
               </div>
               <Link href="/shop" style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 600, color: '#2D5F5A', textDecoration: 'none' }}>View All →</Link>
             </div>
-            <ProductSlider products={BESTSELLERS} onAddToCart={addToCart} />
+            <ProductSlider products={BESTSELLERS} onAddToCart={addToCart} isMobile={isMobile} />
           </div>
 
           {/* New Launches */}
@@ -410,7 +412,7 @@ export default function HomePage() {
               </div>
               <Link href="/shop?sort=newest" style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 600, color: '#2D5F5A', textDecoration: 'none' }}>View All →</Link>
             </div>
-            <ProductSlider products={NEW_LAUNCHES} onAddToCart={addToCart} />
+            <ProductSlider products={NEW_LAUNCHES} onAddToCart={addToCart} isMobile={isMobile} />
           </div>
 
           {/* Budget Picks */}
@@ -422,7 +424,7 @@ export default function HomePage() {
               </div>
               <Link href="/shop?filter=budget" style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 600, color: '#2D5F5A', textDecoration: 'none' }}>View All →</Link>
             </div>
-            <ProductSlider products={BUDGET} onAddToCart={addToCart} />
+            <ProductSlider products={BUDGET} onAddToCart={addToCart} isMobile={isMobile} />
           </div>
         </div>
       </section>

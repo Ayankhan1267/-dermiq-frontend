@@ -158,14 +158,17 @@ export default function CheckoutPage() {
               </p>
             </div>
             <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 24, lineHeight: 1.6 }}>
-              We'll send updates to your phone and email. Track your order anytime from your account.
+              We'll send updates to your phone and email. Track your order anytime below.
             </p>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button onClick={() => router.push('/account')} style={{ background: '#2D5F5A', color: '#fff', border: 'none', borderRadius: 12, padding: '12px 24px', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
+              <button onClick={() => router.push(`/order-tracking?id=${orderId}`)} style={{ background: '#2D5F5A', color: '#fff', border: 'none', borderRadius: 12, padding: '12px 24px', fontSize: 14, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+                📦 Track My Order →
+              </button>
+              <button onClick={() => router.push('/account')} style={{ background: '#F0FAF4', color: '#2D5F5A', border: '1px solid #A7F3D0', borderRadius: 12, padding: '12px 24px', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
                 View My Orders
               </button>
               <button onClick={() => router.push('/shop')} style={{ background: '#F7F3EE', color: '#2D5F5A', border: '1px solid #E8E0D8', borderRadius: 12, padding: '12px 24px', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
-                Continue Shopping
+                Continue Shopping →
               </button>
             </div>
           </div>
@@ -203,7 +206,7 @@ export default function CheckoutPage() {
                 <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: 24, color: '#1A2E2B', marginBottom: 24 }}>
                   Delivery Address
                 </h2>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
                   <div style={{ gridColumn: '1 / -1' }}>
                     <label style={{ fontSize: 13, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 6 }}>Full Name *</label>
                     <input value={address.name} onChange={e => setAddress({ ...address, name: e.target.value })} placeholder="Priya Sharma" style={inputStyle(errors.name)} />

@@ -46,17 +46,17 @@ const SKIN_TYPE_ICONS: Record<string, string> = {
 }
 
 const MORNING_STEPS = [
-  { step: 1, type: 'Cleanser', product: 'DermIQ Gentle Foaming Cleanser', concern: 'All skin types', href: '/shop?q=cleanser' },
-  { step: 2, type: 'Vitamin C Serum', product: 'DermIQ 15% Vitamin C Serum', concern: 'Brightening + Antioxidant protection', href: '/shop?q=vitamin-c' },
-  { step: 3, type: 'Moisturiser', product: 'DermIQ Barrier Repair Moisturiser', concern: 'Hydration + Barrier support', href: '/shop?q=moisturiser' },
-  { step: 4, type: 'SPF 50', product: 'DermIQ Invisible Sunscreen SPF 50+', concern: 'UV protection', href: '/shop?q=sunscreen' },
+  { step: 1, type: 'Cleanser', product: 'DermIQ Gentle Foaming Cleanser', concern: 'All skin types', href: '/product/5' },
+  { step: 2, type: 'Vitamin C Serum', product: 'DermIQ 15% Vitamin C Serum', concern: 'Brightening + Antioxidant protection', href: '/product/1' },
+  { step: 3, type: 'Moisturiser', product: 'DermIQ Barrier Repair Moisturiser', concern: 'Hydration + Barrier support', href: '/product/3' },
+  { step: 4, type: 'SPF 50', product: 'DermIQ Invisible Sunscreen SPF 50+', concern: 'UV protection', href: '/product/4' },
 ]
 
 const NIGHT_STEPS = [
-  { step: 1, type: 'Cleanser', product: 'DermIQ Oil-Balancing Cleanser', concern: 'Remove makeup + impurities', href: '/shop?q=cleanser' },
-  { step: 2, type: 'Treatment', product: 'DermIQ Retinol 0.3% Night Serum', concern: 'Cell turnover + Anti-aging', href: '/shop?q=retinol' },
-  { step: 3, type: 'Moisturiser', product: 'DermIQ Ceramide Night Cream', concern: 'Deep hydration + Repair', href: '/shop?q=night-cream' },
-  { step: 4, type: 'Eye Cream', product: 'DermIQ Peptide Eye Complex', concern: 'Dark circles + Fine lines', href: '/shop?q=eye-cream' },
+  { step: 1, type: 'Cleanser', product: 'DermIQ Oil-Balancing Cleanser', concern: 'Remove makeup + impurities', href: '/product/5' },
+  { step: 2, type: 'Treatment', product: 'DermIQ Retinol 0.3% Night Serum', concern: 'Cell turnover + Anti-aging', href: '/product/2' },
+  { step: 3, type: 'Moisturiser', product: 'DermIQ Ceramide Night Cream', concern: 'Deep hydration + Repair', href: '/product/3' },
+  { step: 4, type: 'Eye Cream', product: 'DermIQ Peptide Eye Complex', concern: 'Dark circles + Fine lines', href: '/product/6' },
 ]
 
 function ScoreCircle({ score }: { score: number }) {
@@ -440,15 +440,23 @@ export default function SkinReportPage() {
               Book a specialist consultation or shop your personalised product recommendations.
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-              <Link href="/specialists" style={{
+              <Link href="/consultation?type=instant" style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,
                 padding: '12px 22px', background: C.teal, color: '#fff',
                 borderRadius: 10, textDecoration: 'none', fontSize: 14, fontWeight: 600,
                 fontFamily: 'var(--font-dm)',
               }}>
-                👩‍⚕️ Book Specialist Consultation
+                ⚡ Book Instant Consultation
               </Link>
-              <Link href="/shop" style={{
+              <Link href="/consultation?type=scheduled" style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                padding: '12px 22px', background: C.teal2, color: '#fff',
+                borderRadius: 10, textDecoration: 'none', fontSize: 14, fontWeight: 600,
+                fontFamily: 'var(--font-dm)',
+              }}>
+                📅 Schedule Consultation
+              </Link>
+              <Link href={`/shop?concern=${encodeURIComponent(concerns[0] || 'skincare')}`} style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,
                 padding: '12px 22px', background: C.accent, color: '#fff',
                 borderRadius: 10, textDecoration: 'none', fontSize: 14, fontWeight: 600,

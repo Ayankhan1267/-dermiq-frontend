@@ -1,7 +1,7 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import toast from 'react-hot-toast'
 import Navbar from '@/components/Navbar'
 import MobileToolbar from '@/components/MobileToolbar'
@@ -84,8 +84,9 @@ function generate7Days() {
 const TIME_SLOTS = generateTimeSlots()
 const DAYS = generate7Days()
 
-export default function ConsultationPage() {
+function ConsultationPageInner() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [cartOpen, setCartOpen] = useState(false)
   const [step, setStep] = useState<Step>(1)
   const [consultType, setConsultType] = useState<ConsultType>(null)
@@ -105,8 +106,14 @@ export default function ConsultationPage() {
     const check = () => setIsMobile(window.innerWidth < 768)
     check()
     window.addEventListener('resize', check)
+    // Pre-select consultation type from URL param
+    const typeParam = searchParams.get('type')
+    if (typeParam === 'instant' || typeParam === 'scheduled') {
+      setConsultType(typeParam)
+      setStep(2) // Skip to specialist selection
+    }
     return () => window.removeEventListener('resize', check)
-  }, [])
+  }, [searchParams])
 
   function applyCoupon() {
     const code = coupon.trim().toUpperCase()
@@ -260,6 +267,13 @@ export default function ConsultationPage() {
                   📹 Join Call Now
                 </button>
               )}
+              <Link href="/skin-report" style={{
+                display: 'block', padding: '13px', background: C.teal, color: '#fff',
+                border: 'none', borderRadius: 12,
+                textDecoration: 'none', fontSize: 14, fontWeight: 600, fontFamily: 'var(--font-dm)', textAlign: 'center',
+              }}>
+                🧬 View My Skin Report
+              </Link>
               <button onClick={() => toast('Calendar invite sent to your email!', { icon: '📅' })} style={{
                 padding: '13px', background: '#fff', color: C.teal,
                 border: `1.5px solid ${C.teal}`, borderRadius: 12,
@@ -798,5 +812,13 @@ export default function ConsultationPage() {
       <MobileToolbar activePage="consultation" />
       <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />
     </>
+  )
+}
+
+export default function ConsultationPage() {
+  return (
+    <Suspense fallback={null}>
+      <ConsultationPageInner />
+    </Suspense>
   )
 }
