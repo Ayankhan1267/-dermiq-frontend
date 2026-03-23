@@ -81,6 +81,7 @@ export default function VendorPage() {
   const [userEmail, setUserEmail] = useState('vendor@minimalist.in')
   const [tab, setTab] = useState('dashboard')
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [dbConnected, setDbConnected] = useState(false)   // true = Supabase live, false = seed data
 
   // Data state
   const [products, setProducts] = useState<Product[]>(SEED_PRODUCTS)
@@ -113,11 +114,44 @@ export default function VendorPage() {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) { router.push('/vendor/login'); return }
         setUserEmail(user.email || '')
-        const { data } = await supabase.from('dermiq_vendors').select('*').eq('email', user.email).single()
-        if (data) { setVendorName(data.brand_name || 'My Brand'); setBrandForm(f => ({ ...f, name: data.brand_name || '' })) }
-        const { data: pData } = await supabase.from('dermiq_products').select('*').eq('vendor_email', user.email)
-        if (pData && pData.length > 0) setProducts(pData)
-      } catch { /* use seed data */ }
+
+        // Try vendors table
+        const { data: vData, error: vErr } = await supabase.from('dermiq_vendors').select('*').eq('email', user.email).single()
+        if (vErr) {
+          // Table might not exist (42P01) or no row — stay on seed data
+          setDbConnected(false)
+        } else {
+          if (vData) {
+            setVendorName(vData.brand_name || 'My Brand')
+            setBrandForm(f => ({ ...f, name: vData.brand_name || '', tagline: vData.tagline || f.tagline }))
+            setBankForm({ holder: vData.bank_holder||'', account: vData.bank_account||'', ifsc: vData.bank_ifsc||'', bank: vData.bank_name||'', upi: vData.upi||'' })
+          }
+          setDbConnected(true)
+        }
+
+        // Try products table
+        const { data: pData, error: pErr } = await supabase.from('dermiq_products').select('*').eq('vendor_email', user.email).order('created_at', { ascending: false })
+        if (!pErr && pData && pData.length > 0) {
+          setProducts(pData.map(p => ({
+            id: p.id, name: p.name, category: p.category, price: p.price, mrp: p.mrp,
+            stock: p.stock, rating: p.rating, active: p.active, emoji: p.emoji,
+            description: p.description, image: p.image, size: p.size,
+            concerns: p.concerns || [],
+          })))
+          setDbConnected(true)
+        }
+
+        // Try orders table
+        const { data: oData } = await supabase.from('dermiq_orders').select('*').eq('vendor_email', user.email).order('created_at', { ascending: false })
+        if (oData && oData.length > 0) {
+          setOrders(oData.map(o => ({
+            id: String(o.id), product: o.product_name, customer: o.customer_name,
+            qty: o.qty, amount: o.amount, status: o.status,
+            date: new Date(o.created_at).toISOString().split('T')[0],
+            address: o.customer_address || '',
+          })))
+        }
+      } catch { /* stay on seed data */ }
       finally { setLoading(false) }
     }
     checkAuth()
@@ -134,22 +168,50 @@ export default function VendorPage() {
     setPForm({ name:p.name, category:p.category, price:String(p.price), mrp:String(p.mrp), stock:String(p.stock), description:p.description||'', emoji:p.emoji, size:p.size||'', concerns:p.concerns||[], active:p.active })
     setProductModal(true)
   }
-  function saveProduct() {
+  async function saveProduct() {
     if (!pForm.name || !pForm.price) { toast.error('Name and price required'); return }
-    if (editingProduct) {
-      setProducts(prev => prev.map(p => p.id === editingProduct.id ? { ...p, ...pForm, price:+pForm.price, mrp:+(pForm.mrp||pForm.price), stock:+pForm.stock } : p))
-      toast.success('Product updated!')
+    const payload = { name:pForm.name, category:pForm.category, price:+pForm.price, mrp:+(pForm.mrp||pForm.price), stock:+pForm.stock, description:pForm.description, emoji:pForm.emoji, size:pForm.size, concerns:pForm.concerns, active:pForm.active, vendor_email:userEmail }
+    if (dbConnected) {
+      if (editingProduct) {
+        const { error } = await supabase.from('dermiq_products').update(payload).eq('id', editingProduct.id)
+        if (error) { toast.error('Failed to update: ' + error.message); return }
+      } else {
+        const { data, error } = await supabase.from('dermiq_products').insert(payload).select().single()
+        if (error) { toast.error('Failed to add: ' + error.message); return }
+        if (data) { setProducts(prev => [{ ...data, concerns: data.concerns||[] }, ...prev]); toast.success('Product added!'); setProductModal(false); return }
+      }
+      // Refresh from DB
+      const { data: fresh } = await supabase.from('dermiq_products').select('*').eq('vendor_email', userEmail).order('created_at', { ascending: false })
+      if (fresh) setProducts(fresh.map(p => ({ ...p, concerns: p.concerns||[] })))
+      toast.success(editingProduct ? 'Product updated!' : 'Product added!')
     } else {
-      setProducts(prev => [{ id:Date.now(), ...pForm, price:+pForm.price, mrp:+(pForm.mrp||pForm.price), stock:+pForm.stock, rating:0 }, ...prev])
-      toast.success('Product added!')
+      // Offline fallback
+      if (editingProduct) {
+        setProducts(prev => prev.map(p => p.id === editingProduct.id ? { ...p, ...pForm, price:+pForm.price, mrp:+(pForm.mrp||pForm.price), stock:+pForm.stock } : p))
+      } else {
+        setProducts(prev => [{ id:Date.now(), ...pForm, price:+pForm.price, mrp:+(pForm.mrp||pForm.price), stock:+pForm.stock, rating:0 }, ...prev])
+      }
+      toast.success((editingProduct ? 'Updated' : 'Added') + ' (local only — connect Supabase to persist)')
     }
     setProductModal(false)
   }
-  function deleteProduct(id:number) { if(confirm('Delete this product?')) { setProducts(p=>p.filter(x=>x.id!==id)); toast.success('Deleted') } }
+
+  async function deleteProduct(id:number) {
+    if (!confirm('Delete this product?')) return
+    if (dbConnected) {
+      const { error } = await supabase.from('dermiq_products').delete().eq('id', id)
+      if (error) { toast.error('Delete failed: ' + error.message); return }
+    }
+    setProducts(p=>p.filter(x=>x.id!==id))
+    toast.success('Deleted')
+  }
   function toggleConcern(c:string) { setPForm(f => ({ ...f, concerns: f.concerns.includes(c) ? f.concerns.filter(x=>x!==c) : [...f.concerns, c] })) }
 
   // ── Order helpers ──────────────────────────────────────────────────────
-  function updateOrderStatus(id:string, status:Order['status']) {
+  async function updateOrderStatus(id:string, status:Order['status']) {
+    if (dbConnected) {
+      await supabase.from('dermiq_orders').update({ status, updated_at: new Date().toISOString() }).eq('id', id)
+    }
     setOrders(prev => prev.map(o => o.id===id ? { ...o, status } : o))
     toast.success(`Order ${id} → ${status}`)
   }
@@ -262,6 +324,28 @@ export default function VendorPage() {
 
       {/* ── Main content ──────────────────────────────────────────────── */}
       <main style={{ flex:1, overflowY:'auto', padding:'28px 32px', minWidth:0 }}>
+
+        {/* DB connection banner */}
+        {!dbConnected && (
+          <div style={{ marginBottom:20, padding:'12px 18px', background:'#FFF7ED', border:'1px solid #FED7AA', borderRadius:12, display:'flex', alignItems:'center', justifyContent:'space-between', gap:16, flexWrap:'wrap' }}>
+            <div style={{ display:'flex', gap:10, alignItems:'center' }}>
+              <span style={{ fontSize:20 }}>⚠️</span>
+              <div>
+                <p style={{ fontFamily:'DM Sans,sans-serif', fontSize:13, fontWeight:700, color:'#92400E', margin:0 }}>Using local data — Supabase tables not connected</p>
+                <p style={{ fontFamily:'DM Sans,sans-serif', fontSize:12, color:'#78350F', margin:'2px 0 0' }}>Changes won&apos;t persist. Create dermiq_products and dermiq_vendors tables in Supabase to persist data.</p>
+              </div>
+            </div>
+            <button onClick={()=>router.push('/vendor/setup')} style={{ padding:'8px 18px', background:'#F97316', color:'#fff', borderRadius:10, border:'none', fontFamily:'DM Sans,sans-serif', fontWeight:700, fontSize:13, cursor:'pointer', flexShrink:0 }}>
+              Seed Tables →
+            </button>
+          </div>
+        )}
+        {dbConnected && (
+          <div style={{ marginBottom:20, padding:'10px 16px', background:'#F0FDF4', border:'1px solid #BBF7D0', borderRadius:12, display:'flex', alignItems:'center', gap:8 }}>
+            <span>✅</span>
+            <p style={{ fontFamily:'DM Sans,sans-serif', fontSize:13, fontWeight:600, color:'#16A34A', margin:0 }}>Connected to Supabase — all changes are saved to database</p>
+          </div>
+        )}
 
         {/* ════════════════════════════════════════════════════════════
             TAB: DASHBOARD
@@ -957,7 +1041,14 @@ export default function VendorPage() {
                 <label style={sx.label}>Brand Story</label>
                 <textarea value={brandForm.story} onChange={e=>setBrandForm(prev=>({...prev,story:e.target.value}))} rows={4} placeholder="Tell customers about your brand, values, and mission..." style={{ ...sx.input, resize:'vertical' } as React.CSSProperties} />
               </div>
-              <button onClick={()=>{ setVendorName(brandForm.name||vendorName); toast.success('Brand profile saved!') }} style={{ ...sx.btn, background:`linear-gradient(135deg,${C.teal},${C.teal2})`, color:'#fff', padding:'13px 28px', marginTop:16 }}>
+              <button onClick={async()=>{
+                setVendorName(brandForm.name||vendorName)
+                if (dbConnected) {
+                  const { error } = await supabase.from('dermiq_vendors').upsert({ email:userEmail, brand_name:brandForm.name, tagline:brandForm.tagline }, { onConflict:'email' })
+                  if (error) { toast.error('Save failed: ' + error.message); return }
+                }
+                toast.success(dbConnected ? 'Brand profile saved to Supabase!' : 'Saved locally (connect Supabase to persist)')
+              }} style={{ ...sx.btn, background:`linear-gradient(135deg,${C.teal},${C.teal2})`, color:'#fff', padding:'13px 28px', marginTop:16 }}>
                 Save Brand Profile
               </button>
             </div>
