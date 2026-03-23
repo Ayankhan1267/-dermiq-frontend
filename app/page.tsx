@@ -16,19 +16,33 @@ const ANN_ITEMS = [
   '👨‍⚕️ Consultations from ₹499',
   '🌿 100% Clean Ingredients',
   '🚚 Same-day dispatch before 2 PM',
+  '💊 NEW: Supplements & Collagen Range',
+  '🍼 NEW: Baby Care Collection — Paediatrician Tested',
+  '💋 NEW: Lips Care & Peptide Serums',
+  '🎨 NEW: Skincare-infused Color Cosmetics',
 ]
 
 const CATEGORIES = ['All Products', '✨ Serums', '💧 Moisturisers', '☀️ Sunscreen', '🫧 Cleansers', '🔬 Treatments', '🎁 Kits', '🏷️ All Brands']
 
 const CATEGORY_LINKS = [
-  { label: 'Serums', emoji: '✨', href: '/shop?cat=serum', bg: '#E8F5E9', color: '#2E7D32' },
-  { label: 'Moisturisers', emoji: '💧', href: '/shop?cat=moisturiser', bg: '#EDE7F6', color: '#6A1B9A' },
-  { label: 'Sunscreen', emoji: '☀️', href: '/shop?cat=sunscreen', bg: '#FFF8E1', color: '#F57F17' },
-  { label: 'Cleansers', emoji: '🫧', href: '/shop?cat=cleanser', bg: '#ECEFF1', color: '#455A64' },
-  { label: 'Treatments', emoji: '🔬', href: '/shop?cat=treatment', bg: '#FCE4EC', color: '#C2185B' },
-  { label: 'Kits', emoji: '🎁', href: '/shop?cat=kit', bg: '#FFFDE7', color: '#F9A825' },
-  { label: 'Skin Profile', emoji: '👤', href: '/skin-profile', bg: '#E3F2FD', color: '#1565C0' },
+  { label: 'Skincare', emoji: '✨', href: '/category/skincare', bg: '#E8F5E9', color: '#2D5F5A' },
+  { label: 'Body Care', emoji: '🧴', href: '/category/bodycare', bg: '#FFF3E0', color: '#C8976A' },
+  { label: 'Lips Care', emoji: '💋', href: '/category/lips-care', bg: '#FCE4EC', color: '#C2185B' },
+  { label: 'Hair Care', emoji: '💈', href: '/category/haircare', bg: '#EDE7F6', color: '#5C35D4' },
+  { label: 'Supplements', emoji: '💊', href: '/category/supplements', bg: '#FFF8E1', color: '#D4A853' },
+  { label: 'Baby Care', emoji: '🍼', href: '/category/baby-care', bg: '#E0F7FA', color: '#4ECDC4' },
+  { label: 'Color', emoji: '🎨', href: '/category/color-cosmetics', bg: '#FFF3F3', color: '#FF6B6B' },
   { label: 'Skin Quiz', emoji: '🧪', href: '/skin-quiz', bg: '#E8F5E9', color: '#2E7D32' },
+]
+
+const MAIN_CATEGORY_CARDS = [
+  { label: 'Skincare', emoji: '✨', href: '/category/skincare', color: '#2D5F5A', bg: '#E8F5E9', image: 'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=600&h=400&fit=crop&q=80', desc: 'Serums, moisturisers & SPF' },
+  { label: 'Body Care', emoji: '🧴', href: '/category/bodycare', color: '#C8976A', bg: '#FFF3E0', image: 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=600&h=400&fit=crop&q=80', desc: 'Lotions, scrubs & butters' },
+  { label: 'Lips Care', emoji: '💋', href: '/category/lips-care', color: '#C2185B', bg: '#FCE4EC', image: 'https://images.unsplash.com/photo-1586495777744-4e6b0c8b9e0f?w=600&h=400&fit=crop&q=80', desc: 'Balms, serums & treatments' },
+  { label: 'Hair Care', emoji: '💈', href: '/category/haircare', color: '#5C35D4', bg: '#EDE7F6', image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&h=400&fit=crop&q=80', desc: 'Serums, oils & masks' },
+  { label: 'Supplements', emoji: '💊', href: '/category/supplements', color: '#D4A853', bg: '#FFF8E1', image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&h=400&fit=crop&q=80', desc: 'Collagen, vitamins & more' },
+  { label: 'Baby Care', emoji: '🍼', href: '/category/baby-care', color: '#4ECDC4', bg: '#E0F7FA', image: 'https://images.unsplash.com/photo-1515488764276-beab7607c1e6?w=600&h=400&fit=crop&q=80', desc: 'Gentle & paediatrician tested' },
+  { label: 'Color Cosmetics', emoji: '🎨', href: '/category/color-cosmetics', color: '#FF6B6B', bg: '#FFF3F3', image: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=600&h=400&fit=crop&q=80', desc: 'Tints, BB cream & more' },
 ]
 
 const TRUST_ITEMS = [
@@ -385,6 +399,69 @@ export default function HomePage() {
               <Link href="/shop?filter=budget" style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 600, color: '#2D5F5A', textDecoration: 'none' }}>View All →</Link>
             </div>
             <ProductSlider products={BUDGET} onAddToCart={addToCart} />
+          </div>
+        </div>
+      </section>
+
+      {/* Shop by Category Mega Grid */}
+      <section style={{ padding: '80px 0', background: '#F7F3EE' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 20px' }}>
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#C8976A', fontFamily: 'DM Sans, sans-serif', letterSpacing: 1, textTransform: 'uppercase' }}>All Categories</span>
+            <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: 36, color: '#1A2E2B', margin: '8px 0 12px' }}>Shop by Category</h2>
+            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: '#6B7280', maxWidth: 460, margin: '0 auto' }}>From skincare essentials to baby care — everything your family needs, backed by science.</p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 20 }}>
+            {MAIN_CATEGORY_CARDS.map(cat => (
+              <Link key={cat.label} href={cat.href} style={{ display: 'block', borderRadius: 20, overflow: 'hidden', textDecoration: 'none', position: 'relative', transition: 'transform 0.15s, box-shadow 0.15s', boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 8px 28px rgba(0,0,0,0.14)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 2px 12px rgba(0,0,0,0.08)' }}
+              >
+                <div style={{ height: 200, position: 'relative' }}>
+                  <Image src={cat.image} alt={cat.label} fill sizes="220px" style={{ objectFit: 'cover' }} />
+                  <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to top, ${cat.color}DD 0%, transparent 60%)` }} />
+                </div>
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '16px', background: `linear-gradient(to top, ${cat.color} 0%, transparent 100%)` }}>
+                  <div style={{ fontSize: 24, marginBottom: 4 }}>{cat.emoji}</div>
+                  <h3 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 16, fontWeight: 800, color: '#fff', marginBottom: 2 }}>{cat.label}</h3>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.8)' }}>{cat.desc}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Today's Deals */}
+      <section style={{ padding: '80px 0', background: '#fff' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 20px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 28 }}>
+            <div>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#EF4444', fontFamily: 'DM Sans, sans-serif', letterSpacing: 1, textTransform: 'uppercase' }}>Limited Time</span>
+              <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: 32, color: '#1A2E2B', marginTop: 4 }}>Today&apos;s Deals</h2>
+            </div>
+            <Link href="/offers" style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 600, color: '#2D5F5A', textDecoration: 'none' }}>View All Offers →</Link>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
+            {ALL_PRODUCTS.filter(p => p.mrp > p.price).sort((a, b) => (b.mrp - b.price) / b.mrp - (a.mrp - a.price) / a.mrp).slice(0, 6).map(product => {
+              const disc = Math.round((1 - product.price / product.mrp) * 100)
+              return (
+                <div key={product.id} style={{ borderRadius: 16, border: '1px solid #E8E0D8', background: '#fff', overflow: 'hidden', cursor: 'pointer' }} onClick={() => router.push(`/product/${product.id}`)}>
+                  <div style={{ height: 160, position: 'relative', background: '#F7F3EE' }}>
+                    <Image src={product.image} alt={product.name} fill sizes="200px" style={{ objectFit: 'cover' }} />
+                    <span style={{ position: 'absolute', top: 8, left: 8, background: '#EF4444', color: '#fff', fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 12, fontFamily: 'DM Sans, sans-serif' }}>-{disc}%</span>
+                  </div>
+                  <div style={{ padding: '10px 12px' }}>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: '#1A1A1A', marginBottom: 4, lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', fontFamily: 'DM Sans, sans-serif' }}>{product.name}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontSize: 14, fontWeight: 800, color: '#2D5F5A', fontFamily: 'DM Sans, sans-serif' }}>₹{product.price}</span>
+                      <span style={{ fontSize: 11, color: '#9CA3AF', textDecoration: 'line-through', fontFamily: 'DM Sans, sans-serif' }}>₹{product.mrp}</span>
+                    </div>
+                    <button onClick={e => { e.stopPropagation(); addToCart(product) }} style={{ marginTop: 8, width: '100%', background: '#2D5F5A', color: '#fff', border: 'none', borderRadius: 8, padding: '7px', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>Add to Cart</button>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
       </section>
