@@ -57,9 +57,11 @@ export default function RefPage({ params }: { params: { slug: string } }) {
           },
         })
         // Increment click count
-        await supabase.rpc('increment_influencer_stats', { p_id: data.id, p_clicks: 1 }).catch(() => {
-          supabase.from('dermiq_influencers').update({ total_clicks: (data as unknown as { total_clicks: number }).total_clicks + 1 }).eq('id', data.id)
-        })
+        try {
+          await supabase.from('dermiq_influencers')
+            .update({ total_clicks: (data as unknown as { total_clicks: number }).total_clicks + 1 })
+            .eq('id', data.id)
+        } catch { /* silent */ }
       } catch { /* silent */ }
 
       setLoading(false)
